@@ -11,6 +11,7 @@ import com.intellij.openapi.project.Project;
 import java.awt.datatransfer.StringSelection;
 
 public class ReplaceTextAction extends AnAction {
+
     @Override
     public void actionPerformed(AnActionEvent anActionEvent) {
 
@@ -18,9 +19,11 @@ public class ReplaceTextAction extends AnAction {
         final SelectionModel selectionModel = editor.getSelectionModel();
 
         String selected = selectionModel.getSelectedText();
-        final String cleanText = selected.replaceAll("\\+|\"", "");
 
-        CopyPasteManager.getInstance().setContents(new StringSelection(cleanText));
+        if (selected != null && !selected.isEmpty()) {
+            final String cleanText = selected.replaceAll("\\+|\"", "");
+            CopyPasteManager.getInstance().setContents(new StringSelection(cleanText));
+        }
     }
 
     @Override

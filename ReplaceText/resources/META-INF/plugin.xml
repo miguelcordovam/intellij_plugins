@@ -31,7 +31,7 @@
   <actions>
     <!-- Add your actions here -->
     <action id="com.mcordova.replacetext.ReplaceTextAction" class="com.mcordova.replacetext.ReplaceTextAction"
-            text="Copy Text" description="Demo">
+            text="Copy SQL query" description="Copy Sql query">
       <add-to-group group-id="EditorPopupMenu" anchor="last"/>
     </action>
   </actions>
