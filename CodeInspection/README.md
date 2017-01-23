@@ -1,6 +1,6 @@
 Code Inspection example
 
-Inspects for statements in code looking for a condition like this:
+Inspects code looking for a condition like this:
 
 for (int i = 0 ; 10 > i; i++) {
 }
