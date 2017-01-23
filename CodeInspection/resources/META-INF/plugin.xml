@@ -1,0 +1,11 @@
+<idea-plugin>
+  <name>Inspecting for condition</name>
+  <description>Inspection for (probably) inappropriate use of condition in for statement</description>
+  <version>1.0</version>
+  <vendor>Miguel</vendor>
+
+  <extensions defaultExtensionNs="com.intellij">
+    <inspectionToolProvider implementation="com.intellij.codeInspection.InspectingForStatement"/>
+  </extensions>
+
+</idea-plugin>
