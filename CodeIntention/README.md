@@ -6,10 +6,10 @@ if (result.isEmpty()) {result = "Empty";} else {result = "Not Empty";}
 This intention will transform it into:
 
 String result = "";
-if (result.isEmpty()) {
-  result = "Empty";
-} else {
-  result = "Not Empty";
+if (result.isEmpty()) {\n
+  result = "Empty";\n
+} else {\n
+  result = "Not Empty";\n
 }
 
 You need to place cursor on "if" and the intention will pop up.
