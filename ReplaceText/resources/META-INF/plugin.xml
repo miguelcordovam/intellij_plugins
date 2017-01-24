@@ -1,17 +1,15 @@
 <idea-plugin version="2">
   <id>com.mcordova.replacetext</id>
-  <name>Plugin display name here</name>
+  <name>Clean SQL Query</name>
   <version>1.0</version>
-  <vendor email="support@yourcompany.com" url="http://www.yourcompany.com">YourCompany</vendor>
+  <vendor email="miguel.cordova@verizon.com" url="">MikiSoft</vendor>
 
   <description><![CDATA[
-      Enter short description for your plugin here.<br>
-      <em>most HTML tags may be used</em>
+      Delete useless characters from SQL query written in Java code.<br>
+
     ]]></description>
 
   <change-notes><![CDATA[
-      Add change notes here.<br>
-      <em>most HTML tags may be used</em>
     ]]>
   </change-notes>
 
@@ -30,10 +28,12 @@
 
   <actions>
     <!-- Add your actions here -->
-    <action id="com.mcordova.replacetext.ReplaceTextAction" class="com.mcordova.replacetext.ReplaceTextAction"
-            text="Copy SQL query" description="Copy Sql query">
-      <add-to-group group-id="EditorPopupMenu" anchor="last"/>
-    </action>
+
+      <action id="com.mcordova.replacetext.ReplaceTextAction" class="com.mcordova.replacetext.ReplaceTextAction"
+              text="Copy SQL query" description="Copy SQL query">
+          <add-to-group group-id="EditorPopupMenu" anchor="last"/>
+
+      </action>
   </actions>
 
 </idea-plugin>

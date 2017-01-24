@@ -1,0 +1,22 @@
+<idea-plugin version="2">
+    <id>FormatIfStatementIntention</id>
+    <name>Format if statement Intention</name>
+    <description>Intention action that formats an inline if statement into an if block</description>
+    <version>1.0</version>
+    <vendor email="support@yourcompany.com" url="http://www.yourcompany.com">YourCompany</vendor>
+
+
+    <extensions defaultExtensionNs="com.intellij">
+        <intentionAction>
+            <className>com.intellij.miguel.intention.FormatIfStatementIntention</className>
+            <category>Conditional Operator</category>
+            <descriptionDirectoryName>FirstIntention</descriptionDirectoryName>
+        </intentionAction>
+    </extensions>
+
+
+    <actions>
+
+    </actions>
+
+</idea-plugin>
