@@ -18,12 +18,14 @@ public class TestController {
 
 }
 
-
-If you right-click on "hi" method, you will see an option to "Copy REST url", and it will copy "/plugin/test/demo/hello" to the clipboard.
-
-The plugin will only be available for methods with RequestMapping annotation.
+Features:
+---------
+- If you right-click on "hi" method, you will see an option to "Copy REST url", and it will copy "/plugin/test/demo/hello" to the clipboard.
+- The plugin will only be available for methods with RequestMapping annotation.
+- Works for any http method.
+- For GET methods, it  will include query string on the url, like this: "?param1=X&param2=X..."
 
 Pending tasks:
 --------------
    - Add option to include hosts, so that the url is complete and ready to paste into browser or Postman.
-   - If it is GET method, add parameters as "?param1=X&param2=X..."
+   - Add tests
