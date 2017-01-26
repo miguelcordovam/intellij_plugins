@@ -9,13 +9,17 @@ import com.intellij.openapi.project.Project;
 import com.intellij.psi.*;
 
 import java.awt.datatransfer.StringSelection;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class CopyRestUrlAction extends AnAction {
 
     public static final String REQUEST_MAPPING = "org.springframework.web.bind.annotation.RequestMapping";
     public static final String CONTROLLER = "org.springframework.stereotype.Controller";
+    public static final String REQUEST_PARAM = "org.springframework.web.bind.annotation.RequestParam";
 
     @Override
     public void actionPerformed(AnActionEvent e) {
@@ -28,13 +32,42 @@ public class CopyRestUrlAction extends AnAction {
         PsiModifierList classModifierList = psiClass.getModifierList();
         PsiModifierList methodModifierList = psiMethod.getModifierList();
 
-        String classUrl = getRequestMappingValue(classModifierList);
-        String methodUrl = getRequestMappingValue(methodModifierList);
+        String classUrl = getRequestMappingValue(classModifierList, "value");
+        String methodUrl = getRequestMappingValue(methodModifierList, "value");
 
-        CopyPasteManager.getInstance().setContents(new StringSelection(classUrl + methodUrl));
+        String httpMethod = getRequestMappingValue(methodModifierList, "method");
+        String queryList = "";
+
+        if (httpMethod.equalsIgnoreCase("GET") || httpMethod.equalsIgnoreCase("RequestMethod.GET")) {
+             queryList = getParams(psiMethod.getParameterList());
+        }
+
+        CopyPasteManager.getInstance().setContents(new StringSelection(classUrl + methodUrl + queryList));
     }
 
-    private String getRequestMappingValue(PsiModifierList modifierList) {
+    private String getParams(PsiParameterList parameterList) {
+        StringBuilder query = new StringBuilder();
+        List<String> params = new ArrayList<>();
+
+        PsiParameter[] parameters = parameterList.getParameters();
+
+        for (PsiParameter parameter : parameters) {
+            PsiModifierList modifierList = parameter.getModifierList();
+
+            if(elementContainsAnnotation(REQUEST_PARAM, modifierList)) {
+                params.add(parameter.getName());
+            }
+        }
+
+        if (parameters.length > 0) {
+            query.append("?");
+            query.append(params.stream().map(s -> s + "=X").collect(Collectors.joining("&")));
+        }
+
+        return query.toString();
+    }
+
+    private String getRequestMappingValue(PsiModifierList modifierList, String attributeName) {
 
         if (modifierList != null) {
             PsiAnnotation[] annotations = modifierList.getAnnotations();
@@ -46,24 +79,28 @@ public class CopyRestUrlAction extends AnAction {
                     PsiAnnotationParameterList parameterList = annotation.getParameterList();
                     PsiNameValuePair[] attributes = parameterList.getAttributes();
 
-                    return getUrlFromValue(attributes);
+                    return getAttributeValue(attributes, attributeName);
                 }
             }
         }
         return "";
     }
 
-    private String getUrlFromValue(PsiNameValuePair[] attributes) {
+    private String getAttributeValue(PsiNameValuePair[] attributes, String attributeName) {
         if (attributes.length == 1) {
             return attributes[0].getLiteralValue();
         } else if (attributes.length > 1) {
             Optional<PsiNameValuePair> psiNameValuePair =
                     Stream.of(attributes)
-                            .filter(a -> a.getName() != null && a.getName().equalsIgnoreCase("value"))
+                            .filter(a -> a.getName() != null && a.getName().equalsIgnoreCase(attributeName))
                             .findFirst();
 
             if (psiNameValuePair.isPresent()) {
-                return psiNameValuePair.get().getLiteralValue();
+                if (psiNameValuePair.get().getLiteralValue() != null) {
+                    return psiNameValuePair.get().getLiteralValue();
+                } else {
+                    return psiNameValuePair.get().getValue().getText();
+                }
             }
         }
         return "";
