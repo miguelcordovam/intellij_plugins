@@ -1,5 +1,8 @@
-package com.miguel.plugin.copyrest;
+package com.copyresturl.action;
 
+import com.copyresturl.common.SpringAnnotations;
+import com.copyresturl.util.PropertiesUtil;
+import com.copyresturl.util.PsiElementUtil;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.CommonDataKeys;
@@ -9,14 +12,17 @@ import com.intellij.openapi.project.Project;
 import com.intellij.psi.*;
 import com.intellij.psi.search.FilenameIndex;
 import com.intellij.psi.search.GlobalSearchScope;
+
 import java.awt.datatransfer.StringSelection;
 
-import static com.miguel.plugin.copyrest.PsiElementUtil.REQUEST_MAPPING_QUALIFIED_NAME;
+import static com.copyresturl.common.SpringAnnotations.CONTROLLER;
+import static com.copyresturl.common.SpringAnnotations.REQUEST_MAPPING_QUALIFIED_NAME;
+import static com.intellij.openapi.actionSystem.CommonDataKeys.EDITOR;
+import static com.intellij.openapi.actionSystem.CommonDataKeys.PROJECT;
+import static com.intellij.openapi.actionSystem.CommonDataKeys.PSI_ELEMENT;
 
 public class CopyRestUrlAction extends AnAction {
 
-    public static final String CONTROLLER = "org.springframework.stereotype.Controller";
-    public static final String REQUEST_PARAM = "org.springframework.web.bind.annotation.RequestParam";
     public static final String LOCALHOST = "http://localhost:";
     public static final String DEFAULT_PORT = "8080";
     public static final String REQUEST_METHOD_GET = "RequestMethod.GET";
@@ -32,7 +38,7 @@ public class CopyRestUrlAction extends AnAction {
     @Override
     public void actionPerformed(AnActionEvent e) {
 
-        PsiElement psiElement = e.getData(CommonDataKeys.PSI_ELEMENT);
+        PsiElement psiElement = e.getData(PSI_ELEMENT);
 
         String queryList = "";
         String port = "";
@@ -44,13 +50,13 @@ public class CopyRestUrlAction extends AnAction {
         PsiModifierList classModifierList = psiClass.getModifierList();
         PsiModifierList methodModifierList = psiMethod.getModifierList();
 
-        String classUrl = psiElementUtil.getRequestMappingValue(classModifierList, VALUE, this);
-        String methodUrl = psiElementUtil.getRequestMappingValue(methodModifierList, VALUE, this);
+        String classUrl = psiElementUtil.getAnnotationValue(classModifierList, VALUE, REQUEST_MAPPING_QUALIFIED_NAME);
+        String methodUrl = psiElementUtil.getAnnotationValue(methodModifierList, VALUE, REQUEST_MAPPING_QUALIFIED_NAME);
 
-        String httpMethod = psiElementUtil.getRequestMappingValue(methodModifierList, METHOD, this);
+        String httpMethod = psiElementUtil.getAnnotationValue(methodModifierList, METHOD, REQUEST_MAPPING_QUALIFIED_NAME);
 
         if (httpMethod.equalsIgnoreCase("GET") || httpMethod.equalsIgnoreCase(REQUEST_METHOD_GET)) {
-             queryList = psiElementUtil.getParams(psiMethod.getParameterList(), this);
+            queryList = psiElementUtil.createQueryWithParameters(psiMethod.getParameterList());
         }
 
         PsiFile[] filesByName = FilenameIndex.getFilesByName(e.getProject(), APPLICATION_PROPERTIES,
@@ -76,10 +82,10 @@ public class CopyRestUrlAction extends AnAction {
 
     @Override
     public void update(AnActionEvent e) {
-        Project project = e.getData(CommonDataKeys.PROJECT);
-        Editor editor = e.getData(CommonDataKeys.EDITOR);
+        Project project = e.getData(PROJECT);
+        Editor editor = e.getData(EDITOR);
 
-        PsiElement psiElement = e.getData(CommonDataKeys.PSI_ELEMENT);
+        PsiElement psiElement = e.getData(PSI_ELEMENT);
 
         boolean available = false;
 
@@ -87,8 +93,8 @@ public class CopyRestUrlAction extends AnAction {
             PsiMethod psiMethod = (PsiMethod) psiElement;
             PsiClass psiClass = psiMethod.getContainingClass();
 
-            available = psiElementUtil.elementContainsAnnotation(REQUEST_MAPPING_QUALIFIED_NAME, psiMethod.getModifierList()) &&
-                    psiElementUtil.elementContainsAnnotation(CONTROLLER, psiClass.getModifierList());
+            available = psiElementUtil.containsSpringAnnotation(REQUEST_MAPPING_QUALIFIED_NAME, psiMethod.getModifierList()) &&
+                    psiElementUtil.containsSpringAnnotation(CONTROLLER, psiClass.getModifierList());
         }
 
         e.getPresentation().setVisible(project != null && editor != null && available);

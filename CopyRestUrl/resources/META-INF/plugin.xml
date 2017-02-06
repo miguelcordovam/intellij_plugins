@@ -1,13 +1,13 @@
 <idea-plugin version="2">
   <id>CopyRestUrl</id>
-  <name>CopyRestUrl</name>
-  <version>1.0</version>
+  <name>Copy REST Url</name>
+  <version>1.1</version>
   <vendor email="miguelcordovadev@gmail.com" url="https://github.com/miguelcordovam/intellij_plugins/tree/master/CopyRestUrl"></vendor>
   <description>
 
 <![CDATA[
-      CopyRestUrl will copy REST url from a Spring @Controller method. <br>
-      Just right-click on the method, and select "Copy Rest Url" and it will copy the url to the clipboard.<br>
+      Copy REST Url will copy REST url from a Spring @Controller method. <br>
+      Just right-click on the method, and select "Copy REST Url" and it will copy the url to the clipboard.<br>
       Then you can paste it on the browser or anywhere you want. <br><br>
       Features:<br>
       - If your application is using Spring-Boot and you have an application.properties file, it will look for these 2 keys: server.port, server.contextPath. And if they are found, it will add those values to the final url.<br>
@@ -17,6 +17,17 @@
 ]]>
 
   </description>
+
+  <change-notes>
+
+    <![CDATA[
+        1.1 <br>
+        - Adding support for @RequestParam("paramName") in methods <br>
+        - Adding shortcut (control + alt + R) <br>
+  ]]>
+
+
+  </change-notes>
 
   <!-- please see http://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/build_number_ranges.html for description -->
   <idea-version since-build="145.0"/>
@@ -28,8 +39,9 @@
   </extensions>
 
   <actions>
-    <action id="copyresturl" class="com.miguel.plugin.copyrest.CopyRestUrlAction" text="Copy Rest Url">
+    <action id="copyresturl" class="com.copyresturl.action.CopyRestUrlAction" text="Copy REST Url" >
       <add-to-group group-id="EditorPopupMenu" anchor="first"/>
+      <keyboard-shortcut first-keystroke="control alt R" keymap="$default" />
     </action>
   </actions>
 

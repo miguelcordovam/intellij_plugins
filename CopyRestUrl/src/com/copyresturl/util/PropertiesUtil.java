@@ -1,4 +1,4 @@
-package com.miguel.plugin.copyrest;
+package com.copyresturl.util;
 
 import java.util.Properties;
 
@@ -33,7 +33,6 @@ public class PropertiesUtil {
     }
 
     public String getPropertyValue(String file, String key) {
-
         Properties properties = getPropertiesFromString(file);
         return (properties.getProperty(key) != null) ? properties.getProperty(key) : "";
     }
