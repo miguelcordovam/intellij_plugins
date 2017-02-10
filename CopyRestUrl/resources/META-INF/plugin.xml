@@ -1,7 +1,7 @@
 <idea-plugin version="2">
   <id>CopyRestUrl</id>
   <name>Copy REST Url</name>
-  <version>1.1</version>
+  <version>1.2</version>
   <vendor email="miguelcordovadev@gmail.com" url="https://github.com/miguelcordovam/intellij_plugins/tree/master/CopyRestUrl"></vendor>
   <description>
 
