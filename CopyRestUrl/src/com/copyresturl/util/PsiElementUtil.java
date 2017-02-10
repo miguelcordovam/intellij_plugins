@@ -14,9 +14,15 @@ import static com.copyresturl.common.SpringAnnotations.REQUEST_PARAM;
 public class PsiElementUtil {
 
     private String getAttributeValue(PsiNameValuePair[] attributes, String attributeName) {
-        if (attributes.length == 1) {
-            return attributes[0].getLiteralValue();
-        } else if (attributes.length > 1) {
+        if (attributes != null && attributes.length == 1) {
+            PsiNameValuePair attribute = attributes[0];
+            if (attribute.getName() != null && attribute.getName().equalsIgnoreCase(attributeName)) {
+                return attribute.getValue().getText();
+            } else if (attribute.getLiteralValue() != null && "value".equalsIgnoreCase(attributeName)) {
+                return attribute.getLiteralValue();
+            }
+
+        } else if (attributes != null && attributes.length > 1) {
             Optional<PsiNameValuePair> psiNameValuePair =
                     Stream.of(attributes)
                             .filter(a -> a.getName() != null && a.getName().equalsIgnoreCase(attributeName))

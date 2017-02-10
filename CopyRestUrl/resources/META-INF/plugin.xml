@@ -21,6 +21,9 @@
   <change-notes>
 
     <![CDATA[
+        1.2 <br>
+        - Adding support for methods with this annotation @RequestMapping(method = 'SOME_HTTP_METHOD')  <br>
+
         1.1 <br>
         - Adding support for @RequestParam("paramName") in methods <br>
         - Adding shortcut (control + alt + R) <br>
