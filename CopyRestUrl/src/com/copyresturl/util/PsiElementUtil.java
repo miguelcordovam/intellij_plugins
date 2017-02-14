@@ -10,6 +10,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static com.copyresturl.common.SpringAnnotations.REQUEST_PARAM;
+import static java.util.stream.Collectors.joining;
 
 public class PsiElementUtil {
 
@@ -17,11 +18,14 @@ public class PsiElementUtil {
         if (attributes != null && attributes.length == 1) {
             PsiNameValuePair attribute = attributes[0];
             if (attribute.getName() != null && attribute.getName().equalsIgnoreCase(attributeName)) {
-                return attribute.getValue().getText();
-            } else if (attribute.getLiteralValue() != null && "value".equalsIgnoreCase(attributeName)) {
+                if (attributeName.equalsIgnoreCase("value")) {
+                    return attribute.getLiteralValue();
+                } else if (attributeName.equalsIgnoreCase("method")) {
+                    return attribute.getValue().getText();
+                }
+            } else if (attribute.getName() == null && attribute.getLiteralValue() != null && "value".equalsIgnoreCase(attributeName)) {
                 return attribute.getLiteralValue();
             }
-
         } else if (attributes != null && attributes.length > 1) {
             Optional<PsiNameValuePair> psiNameValuePair =
                     Stream.of(attributes)
@@ -59,9 +63,9 @@ public class PsiElementUtil {
             }
         }
 
-        if (parameters.length > 0) {
+        if (params.size() > 0) {
             query.append("?");
-            query.append(params.stream().map(s -> s + "=X").collect(Collectors.joining("&")));
+            query.append(params.stream().map(s -> s + "=X").collect(joining("&")));
         }
 
         return query.toString();

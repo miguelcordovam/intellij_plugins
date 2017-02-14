@@ -6,6 +6,7 @@ import com.copyresturl.util.PsiElementUtil;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.CommonDataKeys;
+import com.intellij.openapi.editor.Caret;
 import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.ide.CopyPasteManager;
 import com.intellij.openapi.project.Project;
@@ -44,40 +45,42 @@ public class CopyRestUrlAction extends AnAction {
         String port = "";
         String contextPath = "";
 
-        PsiMethod psiMethod = (PsiMethod) psiElement;
-        PsiClass psiClass = psiMethod.getContainingClass();
+        if (psiElement instanceof PsiMethod) {
+            PsiMethod psiMethod = (PsiMethod) psiElement;
+            PsiClass psiClass = psiMethod.getContainingClass();
 
-        PsiModifierList classModifierList = psiClass.getModifierList();
-        PsiModifierList methodModifierList = psiMethod.getModifierList();
+            PsiModifierList classModifierList = psiClass.getModifierList();
+            PsiModifierList methodModifierList = psiMethod.getModifierList();
 
-        String classUrl = psiElementUtil.getAnnotationValue(classModifierList, VALUE, REQUEST_MAPPING_QUALIFIED_NAME);
-        String methodUrl = psiElementUtil.getAnnotationValue(methodModifierList, VALUE, REQUEST_MAPPING_QUALIFIED_NAME);
+            String classUrl = psiElementUtil.getAnnotationValue(classModifierList, VALUE, REQUEST_MAPPING_QUALIFIED_NAME);
+            String methodUrl = psiElementUtil.getAnnotationValue(methodModifierList, VALUE, REQUEST_MAPPING_QUALIFIED_NAME);
 
-        String httpMethod = psiElementUtil.getAnnotationValue(methodModifierList, METHOD, REQUEST_MAPPING_QUALIFIED_NAME);
+            String httpMethod = psiElementUtil.getAnnotationValue(methodModifierList, METHOD, REQUEST_MAPPING_QUALIFIED_NAME);
 
-        if (httpMethod.equalsIgnoreCase("GET") || httpMethod.equalsIgnoreCase(REQUEST_METHOD_GET)) {
-            queryList = psiElementUtil.createQueryWithParameters(psiMethod.getParameterList());
+            if (httpMethod.equalsIgnoreCase("GET") || httpMethod.equalsIgnoreCase(REQUEST_METHOD_GET)) {
+                queryList = psiElementUtil.createQueryWithParameters(psiMethod.getParameterList());
+            }
+
+            PsiFile[] filesByName = FilenameIndex.getFilesByName(e.getProject(), APPLICATION_PROPERTIES,
+                    GlobalSearchScope.allScope(e.getProject()));
+
+            if (filesByName.length > 0) {
+                PsiFile psiFile = filesByName[0];
+
+                port = propertiesUtil.getPropertyValue(psiFile.getText(), SERVER_PORT);
+                contextPath = propertiesUtil.getPropertyValue(psiFile.getText(), SERVER_CONTEXT_PATH);
+            }
+
+            StringBuilder url = new StringBuilder();
+            url.append(LOCALHOST);
+            url.append(port.isEmpty() ? DEFAULT_PORT : port);
+            url.append(contextPath);
+            url.append(classUrl);
+            url.append(methodUrl);
+            url.append(queryList);
+
+            CopyPasteManager.getInstance().setContents(new StringSelection(url.toString()));
         }
-
-        PsiFile[] filesByName = FilenameIndex.getFilesByName(e.getProject(), APPLICATION_PROPERTIES,
-                GlobalSearchScope.allScope(e.getProject()));
-
-        if (filesByName.length > 0) {
-            PsiFile psiFile = filesByName[0];
-
-            port = propertiesUtil.getPropertyValue(psiFile.getText(), SERVER_PORT);
-            contextPath = propertiesUtil.getPropertyValue(psiFile.getText(), SERVER_CONTEXT_PATH);
-        }
-
-        StringBuilder url = new StringBuilder();
-        url.append(LOCALHOST);
-        url.append(port.isEmpty() ? DEFAULT_PORT : port);
-        url.append(contextPath);
-        url.append(classUrl);
-        url.append(methodUrl);
-        url.append(queryList);
-
-        CopyPasteManager.getInstance().setContents(new StringSelection(url.toString()));
     }
 
     @Override
