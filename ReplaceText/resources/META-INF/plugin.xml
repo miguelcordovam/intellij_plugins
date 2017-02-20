@@ -1,5 +1,5 @@
 <idea-plugin version="2">
-  <id>com.mcordova.replacetext</id>
+  <id>com.mcordova.cleansql</id>
   <name>Clean SQL Query</name>
   <version>1.0</version>
   <vendor email="miguel.cordova@verizon.com" url="">MikiSoft</vendor>
@@ -29,7 +29,7 @@
   <actions>
     <!-- Add your actions here -->
 
-      <action id="com.mcordova.replacetext.ReplaceTextAction" class="com.mcordova.replacetext.ReplaceTextAction"
+      <action id="com.mcordova.cleansql.ReplaceTextAction" class="com.mcordova.cleansql.ReplaceTextAction"
               text="Copy SQL query" description="Copy SQL query">
           <add-to-group group-id="EditorPopupMenu" anchor="last"/>
 

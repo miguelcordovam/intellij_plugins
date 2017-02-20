@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Rest Documentation</title>
+</head>
+<body>
+#foreach ($service in $services)
+
+    <table style="width:400px; border:1px solid #c3d9ec; background-color: #e7f0f7">
+
+        <tr style="border:1px solid #c3d9ec;">
+            <td style="background-color:#0f6ab4; color:#fff">$service.method</td><td>$service.url</td>
+        </tr>
+        <tr><td>$service.name</td><td></td></tr>
+
+        <tr><td colspan="2"><b>Parameters</b></td></tr>
+        <tr>
+            <td></td><table border="1">
+                <tr><th>Parameter</th><th>Type</th></tr>
+                #foreach ($param in $service.params)
+                    <tr><td>$param.name</td><td>$param.type</td></tr>
+                #end
+            </table>
+        </tr>
+    </table>
+#end
+</body>
+</html>

@@ -1,0 +1,38 @@
+<idea-plugin version="2">
+  <id>Show REST Services</id>
+  <name>Show REST Services</name>
+  <version>1.0</version>
+  <vendor email="miguelcordovadev@gmail.com" url=""></vendor>
+
+  <description><![CDATA[
+      ShowRestServices will create a tool window containing all the REST services in your project grouped by module and HTTP method.
+      Go to "Tools > Show REST Services"
+    ]]></description>
+
+  <change-notes><![CDATA[
+      1.0 <br>
+      - Reads all classes looking for REST services methods
+    ]]>
+  </change-notes>
+
+  <!-- please see http://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/build_number_ranges.html for description -->
+  <idea-version since-build="145.0"/>
+
+  <!-- please see http://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/plugin_compatibility.html
+       on how to target different products -->
+  <!-- uncomment to enable plugin in all products
+  <depends>com.intellij.modules.lang</depends>
+  -->
+
+  <actions>
+    <!-- Add your actions here -->
+    <!--<action id="GenerateRestDocs" class="com.restdocs.action.GenerateRestDocsAction" text="Generate Rest Documentation"-->
+            <!--description="Generate Rest Documentation">-->
+      <!--<add-to-group group-id="ToolsMenu" anchor="first"/>-->
+    <!--</action>-->
+    <action id="ShowRestServices" class="com.restdocs.action.ShowRestServicesAction" text="Show Rest Services">
+      <add-to-group group-id="ToolsMenu" anchor="first"/>
+    </action>
+  </actions>
+
+</idea-plugin>
