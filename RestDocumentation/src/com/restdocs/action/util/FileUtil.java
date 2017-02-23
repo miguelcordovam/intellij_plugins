@@ -6,12 +6,13 @@ import com.intellij.psi.PsiDirectory;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiFileFactory;
 import com.intellij.psi.PsiManager;
-import com.restdocs.action.common.RestService;
-import org.apache.commons.lang.StringEscapeUtils;
+import com.restdocs.action.common.RestServiceNode;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.VelocityEngine;
 
-import java.io.*;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.StringWriter;
 import java.util.List;
 import java.util.Properties;
 
@@ -19,7 +20,7 @@ import static com.intellij.openapi.fileTypes.FileTypes.PLAIN_TEXT;
 
 public class FileUtil {
 
-    public void createFile (Project project, String fileName, List<RestService> services) {
+    public void createFile(Project project, String fileName, List<RestServiceNode> services) {
         PsiFile psiFile = PsiFileFactory.getInstance(project).createFileFromText(fileName, PLAIN_TEXT, createHtmlFile(services));
 
         PsiDirectory directory = PsiManager.getInstance(project).findDirectory(project.getBaseDir());
@@ -36,7 +37,7 @@ public class FileUtil {
         }
     }
 
-    private String createHtmlFile (List<RestService> services) {
+    private String createHtmlFile(List<RestServiceNode> services) {
         VelocityContext context = new VelocityContext();
         context.put("services", services);
 
@@ -53,6 +54,6 @@ public class FileUtil {
         StringWriter writer = new StringWriter();
         engine.evaluate(context, writer, "REST", new InputStreamReader(input));
 
-        return  writer.toString().replace("\n","").replace("\r","");
+        return writer.toString().replace("\n", "").replace("\r", "");
     }
 }

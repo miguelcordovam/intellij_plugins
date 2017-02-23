@@ -3,14 +3,11 @@ package com.restdocs.action.common;
 import com.intellij.psi.PsiClass;
 import com.intellij.psi.PsiMethod;
 
-import java.util.List;
-
-public class RestService {
+public class RestServiceNode {
 
     private String name;
     private HttpMethod method;
     private String url;
-    private List<Parameter> params;
     private PsiClass psiClass;
     private PsiMethod psiMethod;
 
@@ -52,14 +49,6 @@ public class RestService {
 
     public void setUrl(String url) {
         this.url = url;
-    }
-
-    public List<Parameter> getParams() {
-        return params;
-    }
-
-    public void setParams(List<Parameter> params) {
-        this.params = params;
     }
 
     @Override

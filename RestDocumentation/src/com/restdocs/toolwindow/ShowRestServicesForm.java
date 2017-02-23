@@ -1,10 +1,9 @@
 package com.restdocs.toolwindow;
 
-import com.intellij.openapi.project.Project;
-import com.intellij.openapi.wm.ToolWindow;
 import com.intellij.ui.components.JBScrollPane;
 import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
+import com.restdocs.action.common.RestTreeCellRenderer;
 
 import javax.swing.*;
 import java.awt.*;
@@ -30,6 +29,7 @@ public class ShowRestServicesForm {
                         null, null, null));
         contentPanel.setVisible(true);
         servicesTree.setModel(null);
+        servicesTree.setCellRenderer(new RestTreeCellRenderer());
     }
 
 

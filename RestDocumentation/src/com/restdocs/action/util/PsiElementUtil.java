@@ -1,10 +1,11 @@
 package com.restdocs.action.util;
 
 import com.intellij.psi.*;
-import com.restdocs.action.common.Parameter;
 import com.restdocs.action.common.SpringAnnotations;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 public class PsiElementUtil {
@@ -21,7 +22,7 @@ public class PsiElementUtil {
             PsiArrayInitializerMemberValue arrayValue = (PsiArrayInitializerMemberValue) value;
 
             for (PsiAnnotationMemberValue initializer : arrayValue.getInitializers()) {
-                values.add(initializer.getText().replaceAll("\\\"",""));
+                values.add(initializer.getText().replaceAll("\\\"", ""));
             }
         }
         return values;

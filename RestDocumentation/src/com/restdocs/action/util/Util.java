@@ -1,14 +1,19 @@
 package com.restdocs.action.util;
 
+import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.module.ModuleManager;
+import com.intellij.openapi.progress.ProgressIndicator;
+import com.intellij.openapi.progress.ProgressManager;
+import com.intellij.openapi.progress.Task;
 import com.intellij.openapi.project.Project;
 import com.intellij.psi.PsiClass;
 import com.intellij.psi.PsiMethod;
 import com.intellij.psi.search.GlobalSearchScope;
 import com.intellij.psi.search.searches.AllClassesSearch;
 import com.restdocs.action.common.HttpMethod;
-import com.restdocs.action.common.RestService;
+import com.restdocs.action.common.RestServiceNode;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 
@@ -45,40 +50,48 @@ public class Util {
         return restUrls;
     }
 
-    public Map<String, List<RestService>> getAllServices(Project project) {
+    public Map<String, List<RestServiceNode>> getAllServices(Project project) {
         Module[] modules = ModuleManager.getInstance(project).getModules();
 
-        Map<String, List<RestService>> result = new HashMap<>();
+        Map<String, List<RestServiceNode>> result = new HashMap<>();
 
         for (Module module : modules) {
-            Collection<PsiClass> all = AllClassesSearch.search(GlobalSearchScope.moduleScope(module), project).findAll();
 
-            List<PsiMethod> services = new ArrayList<>();
+            ApplicationManager.getApplication().runReadAction(new Runnable() {
 
-            for (PsiClass psiClass : all) {
-                if (isClassControllerAnnotated(psiClass)) {
-                    PsiMethod[] methods = psiClass.getMethods();
+                @Override
+                public void run() {
+                    Collection<PsiClass> all = AllClassesSearch.search(GlobalSearchScope.moduleScope(module), project).findAll();
 
-                    for (PsiMethod method : methods) {
-                        if (isMethodRequestMappingAnnotated(method)) {
-                            services.add(method);
+                    List<PsiMethod> services = new ArrayList<>();
+
+                    for (PsiClass psiClass : all) {
+                        if (isClassControllerAnnotated(psiClass)) {
+                            PsiMethod[] methods = psiClass.getMethods();
+
+                            for (PsiMethod method : methods) {
+                                if (isMethodRequestMappingAnnotated(method)) {
+                                    services.add(method);
+                                }
+                            }
                         }
                     }
+
+                    List<RestServiceNode> restServices = createRestServices(services);
+
+                    if (restServices.size() > 0) {
+                        result.put(module.getName(), restServices);
+                    }
                 }
-            }
+            });
 
-            List<RestService> restServices = createRestServices(services);
-
-            if (restServices.size() > 0) {
-                result.put(module.getName(), restServices);
-            }
         }
 
         return result;
     }
 
-    private List<RestService> createRestServices (List<PsiMethod> services) {
-        List<RestService> restServices = new ArrayList<>();
+    private List<RestServiceNode> createRestServices (List<PsiMethod> services) {
+        List<RestServiceNode> restServices = new ArrayList<>();
 
         for (PsiMethod method : services) {
 
@@ -96,14 +109,14 @@ public class Util {
 
             for (String url: restUrls) {
                 for(String met: methods) {
-                    RestService restService = new RestService();
-                    restService.setUrl(url);
-                    restService.setMethod(getHttpMethod(met));
-                    restService.setName(method.getName());
-                    restService.setPsiMethod(method);
-                    restService.setPsiClass(method.getContainingClass());
+                    RestServiceNode restServiceNode = new RestServiceNode();
+                    restServiceNode.setUrl(url);
+                    restServiceNode.setMethod(getHttpMethod(met));
+                    restServiceNode.setName(method.getName());
+                    restServiceNode.setPsiMethod(method);
+                    restServiceNode.setPsiClass(method.getContainingClass());
 
-                    restServices.add(restService);
+                    restServices.add(restServiceNode);
                 }
             }
         }

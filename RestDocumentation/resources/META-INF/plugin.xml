@@ -2,16 +2,22 @@
   <id>Show REST Services</id>
   <name>Show REST Services</name>
   <version>1.0</version>
-  <vendor email="miguelcordovadev@gmail.com" url=""></vendor>
+  <vendor email="miguelcordovadev@gmail.com" url="https://github.com/miguelcordovam/intellij_plugins/tree/master/RestDocumentation"></vendor>
 
   <description><![CDATA[
-      ShowRestServices will create a tool window containing all the REST services in your project grouped by module and HTTP method.
-      Go to "Tools > Show REST Services"
+      Show REST Services will create a Tool Window containing all the REST services in your project grouped by module and HTTP method.
+      <br>
+      <br>How does it work?<br>
+      1. Install the plugin and restart.<br>
+      2. Go to "Tools > Show REST Services".<br>
+      3. A Tool Window named "REST Services" will show up on your right.<br>
+      4. Navigate through the tree, click on any REST Service and you will go directly to that service code in your Editor.<br>
+
     ]]></description>
 
   <change-notes><![CDATA[
       1.0 <br>
-      - Reads all classes looking for REST services methods
+      - Reads all classes in your project looking for REST services.
     ]]>
   </change-notes>
 
@@ -30,7 +36,7 @@
             <!--description="Generate Rest Documentation">-->
       <!--<add-to-group group-id="ToolsMenu" anchor="first"/>-->
     <!--</action>-->
-    <action id="ShowRestServices" class="com.restdocs.action.ShowRestServicesAction" text="Show Rest Services">
+    <action id="ShowRestServices" class="com.restdocs.action.ShowRestServicesAction" text="Show REST Services">
       <add-to-group group-id="ToolsMenu" anchor="first"/>
     </action>
   </actions>

@@ -1,32 +1,30 @@
 package com.restdocs.action;
 
+import com.intellij.icons.AllIcons;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.CommonDataKeys;
+import com.intellij.openapi.application.ApplicationManager;
+import com.intellij.openapi.progress.ProgressIndicator;
+import com.intellij.openapi.progress.ProgressManager;
+import com.intellij.openapi.progress.Task;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.wm.ToolWindow;
 import com.intellij.openapi.wm.ToolWindowAnchor;
 import com.intellij.openapi.wm.ToolWindowManager;
-import com.intellij.openapi.wm.WindowManager;
-import com.intellij.openapi.wm.ex.ToolWindowManagerAdapter;
-import com.intellij.openapi.wm.ex.ToolWindowManagerEx;
 import com.intellij.util.OpenSourceUtil;
 import com.restdocs.action.common.HttpMethod;
-import com.restdocs.action.common.RestService;
+import com.restdocs.action.common.RestServiceNode;
 import com.restdocs.action.util.Util;
 import com.restdocs.toolwindow.ShowRestServicesForm;
-import com.restdocs.widgets.StatusBarLoadingWidget;
+import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
-import java.awt.event.FocusEvent;
-import java.awt.event.FocusListener;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import static com.intellij.openapi.actionSystem.CommonDataKeys.PROJECT;
 import static java.util.stream.Collectors.groupingBy;
@@ -34,106 +32,84 @@ import static javax.swing.tree.TreeSelectionModel.SINGLE_TREE_SELECTION;
 
 public class ShowRestServicesAction extends AnAction {
 
-    public static final String TOOL_WINDOW_ID = "Show Rest Services";
+    public static final String TOOL_WINDOW_ID = "REST Services";
     private Util util = new Util();
-    private boolean reloadServices = false;
     private ShowRestServicesForm ui = new ShowRestServicesForm();
 
     @Override
     public void actionPerformed(AnActionEvent e) {
-
         Project project = e.getData(CommonDataKeys.PROJECT);
+        loadServicesOnBackground(project);
 
+        ToolWindow toolWindow = ToolWindowManager.getInstance(project).getToolWindow(TOOL_WINDOW_ID);
+        if (toolWindow != null && toolWindow.isVisible()) {
+            toolWindow.hide(null);
+            ToolWindowManager.getInstance(project).unregisterToolWindow(TOOL_WINDOW_ID);
+        }
+    }
+
+    private void loadServicesOnBackground(Project project) {
+        ApplicationManager.getApplication().executeOnPooledThread(() ->
+                ApplicationManager.getApplication().runReadAction(() ->
+                        ProgressManager.getInstance().run(new Task.Backgroundable(project, "Loading Rest Services") {
+                            @Override
+                            public void run(@NotNull ProgressIndicator indicator) {
+                                indicator.setText("Searching for REST Services in your project...");
+                                loadServices(project);
+
+                                ApplicationManager.getApplication().invokeLater(() -> {
+                                    registerToolWindow(project);
+                                });
+                            }
+                        })));
+    }
+
+    private void registerToolWindow(Project project) {
         String[] toolWindowIds = ToolWindowManager.getInstance(project).getToolWindowIds();
 
-        boolean isRegistered = Arrays.asList(toolWindowIds).stream().anyMatch(s -> s.equalsIgnoreCase(TOOL_WINDOW_ID));
+        boolean isToolWindowRegistered = Arrays.asList(toolWindowIds).stream().anyMatch(s -> s.equalsIgnoreCase(TOOL_WINDOW_ID));
 
-        if (!isRegistered) {
+        if (!isToolWindowRegistered) {
             ToolWindow toolWindow =
                     ToolWindowManager.getInstance(project).registerToolWindow(TOOL_WINDOW_ID, false, ToolWindowAnchor.RIGHT);
 
             toolWindow.getComponent().add(ui.getContentPanel());
             toolWindow.setTitle("REST Services");
-            toolWindow.show(() -> loadServices(project));
-
-            addListeners(toolWindow, project);
+            toolWindow.setIcon(AllIcons.CodeStyle.Gear);
+            toolWindow.show(null);
         } else {
             ToolWindow toolWindow = ToolWindowManager.getInstance(project).getToolWindow(TOOL_WINDOW_ID);
-            toolWindow.show(() -> loadServices(project));
-        }
-    }
-
-    private void addListeners(ToolWindow myToolWindow, final Project project) {
-
-        ToolWindowManagerEx manager = ToolWindowManagerEx.getInstanceEx(project);
-
-        ToolWindowManagerAdapter toolWindowManagerListener = new ToolWindowManagerAdapter() {
-            @Override
-            public void stateChanged() {
-                if (!myToolWindow.isVisible() && !reloadServices) {
-                    manager.removeToolWindowManagerListener(this);
-                    reloadServices = true;
-                }
-            }
-        };
-
-        FocusListener listener = new FocusListener() {
-            @Override
-            public void focusGained(FocusEvent e) {
-                if (reloadServices) {
-//                    WindowManager.getInstance().getStatusBar(project).addWidget(new StatusBarLoadingWidget(), "before Position");
-                    SwingUtilities.invokeLater(() -> loadServices(project));
-                    reloadServices = false;
-                    manager.addToolWindowManagerListener(toolWindowManagerListener);
-                }
-            }
-
-            @Override
-            public void focusLost(FocusEvent e) {
-                if (!myToolWindow.isVisible()) {
-                    reloadServices = true;
-                }
-            }
-        };
-
-        ui.getServicesTree().addFocusListener(listener);
-
-        if (reloadServices) {
-            SwingUtilities.invokeLater(() -> loadServices(project));
+            toolWindow.show(null);
         }
     }
 
     @Override
     public void update(AnActionEvent e) {
         Project project = e.getData(PROJECT);
-
         e.getPresentation().setVisible(project != null);
     }
 
     private void loadServices(Project project) {
-
         JTree servicesTree = ui.getServicesTree();
 
         servicesTree.setModel(null);
 
-        ui.getContentPanel().setVisible(false);
+        DefaultMutableTreeNode root = new DefaultMutableTreeNode("REST Services");
 
-        DefaultMutableTreeNode root = new DefaultMutableTreeNode("Services");
-
-        Map<String, List<RestService>> allServices = util.getAllServices(project);
+        Map<String, List<RestServiceNode>> allServices = util.getAllServices(project);
 
         for (String moduleName : allServices.keySet()) {
-            List<RestService> servicesByModule = allServices.get(moduleName);
+            List<RestServiceNode> servicesByModule = allServices.get(moduleName);
             DefaultMutableTreeNode moduleNode = new DefaultMutableTreeNode(moduleName);
 
-            Map<HttpMethod, List<RestService>> groupedByHttpMethod =  servicesByModule.stream()
-                    .collect(groupingBy(RestService::getMethod));
+            Map<HttpMethod, List<RestServiceNode>> groupedByHttpMethod = servicesByModule.stream()
+                    .collect(groupingBy(RestServiceNode::getMethod));
 
             for (HttpMethod method : groupedByHttpMethod.keySet()) {
-                List<RestService> services = groupedByHttpMethod.get(method);
+                List<RestServiceNode> services = groupedByHttpMethod.get(method);
                 DefaultMutableTreeNode methodNode = new DefaultMutableTreeNode(method);
 
-                for (RestService service : services) {
+                for (RestServiceNode service : services) {
                     DefaultMutableTreeNode restService = new DefaultMutableTreeNode(service);
                     methodNode.add(restService);
                 }
@@ -153,12 +129,10 @@ public class ShowRestServicesAction extends AnAction {
 
             if (nodeSelected == null) return;
 
-            if (nodeSelected.getUserObject() instanceof RestService) {
-                RestService service = (RestService) nodeSelected.getUserObject();
+            if (nodeSelected.getUserObject() instanceof RestServiceNode) {
+                RestServiceNode service = (RestServiceNode) nodeSelected.getUserObject();
                 OpenSourceUtil.navigate(true, service.getPsiMethod());
             }
         });
-
-        ui.getContentPanel().setVisible(true);
     }
 }
