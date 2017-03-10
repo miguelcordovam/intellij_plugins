@@ -4,10 +4,10 @@ import com.intellij.icons.AllIcons;
 
 import javax.swing.*;
 import javax.swing.tree.DefaultMutableTreeNode;
-import javax.swing.tree.TreeCellRenderer;
+import javax.swing.tree.DefaultTreeCellRenderer;
 import java.awt.*;
 
-public class RestTreeCellRenderer implements TreeCellRenderer {
+public class RestTreeCellRenderer extends DefaultTreeCellRenderer {
 
     private JLabel label;
 

@@ -15,7 +15,7 @@ import com.intellij.openapi.wm.ToolWindowManager;
 import com.intellij.util.OpenSourceUtil;
 import com.restdocs.action.common.HttpMethod;
 import com.restdocs.action.common.RestServiceNode;
-import com.restdocs.action.util.Util;
+import com.restdocs.action.util.ServicesUtil;
 import com.restdocs.toolwindow.ShowRestServicesForm;
 import org.jetbrains.annotations.NotNull;
 
@@ -32,9 +32,8 @@ import static javax.swing.tree.TreeSelectionModel.SINGLE_TREE_SELECTION;
 
 public class ShowRestServicesAction extends AnAction {
 
-    public static final String TOOL_WINDOW_ID = "REST Services";
-    private Util util = new Util();
-    private ShowRestServicesForm ui = new ShowRestServicesForm();
+    private static final String TOOL_WINDOW_ID = "REST Services";
+    private ServicesUtil servicesUtil = new ServicesUtil();
 
     @Override
     public void actionPerformed(AnActionEvent e) {
@@ -55,16 +54,17 @@ public class ShowRestServicesAction extends AnAction {
                             @Override
                             public void run(@NotNull ProgressIndicator indicator) {
                                 indicator.setText("Searching for REST Services in your project...");
-                                loadServices(project);
+                                ShowRestServicesForm ui = new ShowRestServicesForm(project);
+                                loadServices(project, ui);
 
                                 ApplicationManager.getApplication().invokeLater(() -> {
-                                    registerToolWindow(project);
+                                    registerToolWindow(project, ui);
                                 });
                             }
                         })));
     }
 
-    private void registerToolWindow(Project project) {
+    private void registerToolWindow(Project project, ShowRestServicesForm ui) {
         String[] toolWindowIds = ToolWindowManager.getInstance(project).getToolWindowIds();
 
         boolean isToolWindowRegistered = Arrays.asList(toolWindowIds).stream().anyMatch(s -> s.equalsIgnoreCase(TOOL_WINDOW_ID));
@@ -89,14 +89,16 @@ public class ShowRestServicesAction extends AnAction {
         e.getPresentation().setVisible(project != null);
     }
 
-    private void loadServices(Project project) {
+    private void loadServices(Project project, ShowRestServicesForm ui) {
         JTree servicesTree = ui.getServicesTree();
 
         servicesTree.setModel(null);
 
         DefaultMutableTreeNode root = new DefaultMutableTreeNode("REST Services");
 
-        Map<String, List<RestServiceNode>> allServices = util.getAllServices(project);
+        Map<String, List<RestServiceNode>> allServices = servicesUtil.getAllServices(project);
+
+        int totalServices = 0;
 
         for (String moduleName : allServices.keySet()) {
             List<RestServiceNode> servicesByModule = allServices.get(moduleName);
@@ -112,10 +114,10 @@ public class ShowRestServicesAction extends AnAction {
                 for (RestServiceNode service : services) {
                     DefaultMutableTreeNode restService = new DefaultMutableTreeNode(service);
                     methodNode.add(restService);
+                    totalServices++;
                 }
 
                 moduleNode.add(methodNode);
-
             }
             root.add(moduleNode);
         }
@@ -134,5 +136,7 @@ public class ShowRestServicesAction extends AnAction {
                 OpenSourceUtil.navigate(true, service.getPsiMethod());
             }
         });
+
+        ui.setStatusText("  " + totalServices + " services");
     }
 }

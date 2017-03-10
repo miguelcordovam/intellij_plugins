@@ -6,7 +6,7 @@ import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.project.Project;
 import com.restdocs.action.util.FileUtil;
 import com.restdocs.action.util.PsiElementUtil;
-import com.restdocs.action.util.Util;
+import com.restdocs.action.util.ServicesUtil;
 
 import static com.intellij.openapi.actionSystem.CommonDataKeys.EDITOR;
 import static com.intellij.openapi.actionSystem.CommonDataKeys.PROJECT;
@@ -14,7 +14,7 @@ import static com.intellij.openapi.actionSystem.CommonDataKeys.PROJECT;
 public class GenerateRestDocsAction extends AnAction {
 
 
-    private Util util = new Util();
+    private ServicesUtil servicesUtil = new ServicesUtil();
     private FileUtil fileUtil = new FileUtil();
     private PsiElementUtil psiElementUtil = new PsiElementUtil();
 
@@ -24,7 +24,7 @@ public class GenerateRestDocsAction extends AnAction {
         // TODO create export REST services as html file option on toolwindow
 //        Project project = e.getProject();
 //
-//        fileUtil.createFile(project, "restDocumentation.html", util.getAllServices(project));
+//        fileUtil.createFile(project, "restDocumentation.html", servicesUtil.getAllServices(project));
     }
 
     @Override

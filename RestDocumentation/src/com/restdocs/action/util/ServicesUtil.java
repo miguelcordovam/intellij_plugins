@@ -3,9 +3,6 @@ package com.restdocs.action.util;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.module.ModuleManager;
-import com.intellij.openapi.progress.ProgressIndicator;
-import com.intellij.openapi.progress.ProgressManager;
-import com.intellij.openapi.progress.Task;
 import com.intellij.openapi.project.Project;
 import com.intellij.psi.PsiClass;
 import com.intellij.psi.PsiMethod;
@@ -13,14 +10,13 @@ import com.intellij.psi.search.GlobalSearchScope;
 import com.intellij.psi.search.searches.AllClassesSearch;
 import com.restdocs.action.common.HttpMethod;
 import com.restdocs.action.common.RestServiceNode;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 
 import static com.restdocs.action.common.SpringAnnotations.CONTROLLER;
 import static com.restdocs.action.common.SpringAnnotations.REQUEST_MAPPING_QUALIFIED_NAME;
 
-public class Util {
+public class ServicesUtil {
 
     public static final String VALUE = "value";
     public static final String METHOD = "method";
@@ -90,7 +86,7 @@ public class Util {
         return result;
     }
 
-    private List<RestServiceNode> createRestServices (List<PsiMethod> services) {
+    private List<RestServiceNode> createRestServices(List<PsiMethod> services) {
         List<RestServiceNode> restServices = new ArrayList<>();
 
         for (PsiMethod method : services) {
@@ -101,14 +97,14 @@ public class Util {
             if (methods.size() == 1 && methods.get(0).isEmpty()) {
                 List<String> classMethods = psiElementUtil.getAnnotationValue(method.getContainingClass().getModifierList(), METHOD, REQUEST_MAPPING_QUALIFIED_NAME);
 
-                if(classMethods.size() >=1 && !classMethods.get(0).isEmpty()) {
+                if (classMethods.size() >= 1 && !classMethods.get(0).isEmpty()) {
                     methods.clear();
                     methods.addAll(classMethods);
                 }
             }
 
-            for (String url: restUrls) {
-                for(String met: methods) {
+            for (String url : restUrls) {
+                for (String met : methods) {
                     RestServiceNode restServiceNode = new RestServiceNode();
                     restServiceNode.setUrl(url);
                     restServiceNode.setMethod(getHttpMethod(met));
