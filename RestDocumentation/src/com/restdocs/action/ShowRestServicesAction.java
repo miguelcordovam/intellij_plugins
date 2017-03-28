@@ -12,28 +12,17 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.wm.ToolWindow;
 import com.intellij.openapi.wm.ToolWindowAnchor;
 import com.intellij.openapi.wm.ToolWindowManager;
-import com.intellij.util.OpenSourceUtil;
-import com.restdocs.action.common.HttpMethod;
-import com.restdocs.action.common.RestServiceNode;
-import com.restdocs.action.util.ServicesUtil;
-import com.restdocs.toolwindow.ShowRestServicesForm;
+import com.restdocs.toolwindow.RestServicesController;
+import com.restdocs.toolwindow.RestServicesUI;
 import org.jetbrains.annotations.NotNull;
 
-import javax.swing.*;
-import javax.swing.tree.DefaultMutableTreeNode;
-import javax.swing.tree.DefaultTreeModel;
 import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
 
 import static com.intellij.openapi.actionSystem.CommonDataKeys.PROJECT;
-import static java.util.stream.Collectors.groupingBy;
-import static javax.swing.tree.TreeSelectionModel.SINGLE_TREE_SELECTION;
 
 public class ShowRestServicesAction extends AnAction {
 
     private static final String TOOL_WINDOW_ID = "REST Services";
-    private ServicesUtil servicesUtil = new ServicesUtil();
 
     @Override
     public void actionPerformed(AnActionEvent e) {
@@ -54,17 +43,18 @@ public class ShowRestServicesAction extends AnAction {
                             @Override
                             public void run(@NotNull ProgressIndicator indicator) {
                                 indicator.setText("Searching for REST Services in your project...");
-                                ShowRestServicesForm ui = new ShowRestServicesForm(project);
-                                loadServices(project, ui);
+
+                                RestServicesController controller = new RestServicesController();
+                                controller.init(project);
 
                                 ApplicationManager.getApplication().invokeLater(() -> {
-                                    registerToolWindow(project, ui);
+                                    registerToolWindow(project, controller.getUi());
                                 });
                             }
                         })));
     }
 
-    private void registerToolWindow(Project project, ShowRestServicesForm ui) {
+    private void registerToolWindow(Project project, RestServicesUI ui) {
         String[] toolWindowIds = ToolWindowManager.getInstance(project).getToolWindowIds();
 
         boolean isToolWindowRegistered = Arrays.asList(toolWindowIds).stream().anyMatch(s -> s.equalsIgnoreCase(TOOL_WINDOW_ID));
@@ -87,56 +77,5 @@ public class ShowRestServicesAction extends AnAction {
     public void update(AnActionEvent e) {
         Project project = e.getData(PROJECT);
         e.getPresentation().setVisible(project != null);
-    }
-
-    private void loadServices(Project project, ShowRestServicesForm ui) {
-        JTree servicesTree = ui.getServicesTree();
-
-        servicesTree.setModel(null);
-
-        DefaultMutableTreeNode root = new DefaultMutableTreeNode("REST Services");
-
-        Map<String, List<RestServiceNode>> allServices = servicesUtil.getAllServices(project);
-
-        int totalServices = 0;
-
-        for (String moduleName : allServices.keySet()) {
-            List<RestServiceNode> servicesByModule = allServices.get(moduleName);
-            DefaultMutableTreeNode moduleNode = new DefaultMutableTreeNode(moduleName);
-
-            Map<HttpMethod, List<RestServiceNode>> groupedByHttpMethod = servicesByModule.stream()
-                    .collect(groupingBy(RestServiceNode::getMethod));
-
-            for (HttpMethod method : groupedByHttpMethod.keySet()) {
-                List<RestServiceNode> services = groupedByHttpMethod.get(method);
-                DefaultMutableTreeNode methodNode = new DefaultMutableTreeNode(method);
-
-                for (RestServiceNode service : services) {
-                    DefaultMutableTreeNode restService = new DefaultMutableTreeNode(service);
-                    methodNode.add(restService);
-                    totalServices++;
-                }
-
-                moduleNode.add(methodNode);
-            }
-            root.add(moduleNode);
-        }
-
-        DefaultTreeModel model = new DefaultTreeModel(root);
-        ui.getServicesTree().setModel(model);
-
-        servicesTree.getSelectionModel().setSelectionMode(SINGLE_TREE_SELECTION);
-        servicesTree.addTreeSelectionListener(e -> {
-            DefaultMutableTreeNode nodeSelected = (DefaultMutableTreeNode) servicesTree.getLastSelectedPathComponent();
-
-            if (nodeSelected == null) return;
-
-            if (nodeSelected.getUserObject() instanceof RestServiceNode) {
-                RestServiceNode service = (RestServiceNode) nodeSelected.getUserObject();
-                OpenSourceUtil.navigate(true, service.getPsiMethod());
-            }
-        });
-
-        ui.setStatusText("  " + totalServices + " services");
     }
 }

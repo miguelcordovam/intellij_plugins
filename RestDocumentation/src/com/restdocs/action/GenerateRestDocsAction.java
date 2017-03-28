@@ -24,7 +24,7 @@ public class GenerateRestDocsAction extends AnAction {
         // TODO create export REST services as html file option on toolwindow
 //        Project project = e.getProject();
 //
-//        fileUtil.createFile(project, "restDocumentation.html", servicesUtil.getAllServices(project));
+//        fileUtil.createFile(project, "restDocumentation.html", servicesUtil.getAllServicesByModule(project));
     }
 
     @Override

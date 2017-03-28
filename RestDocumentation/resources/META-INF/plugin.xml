@@ -1,7 +1,7 @@
 <idea-plugin version="2">
   <id>Show REST Services</id>
   <name>Show REST Services</name>
-  <version>1.1</version>
+  <version>1.2</version>
   <vendor email="miguelcordovadev@gmail.com" url="https://github.com/miguelcordovam/intellij_plugins/tree/master/RestDocumentation"></vendor>
 
   <description><![CDATA[
@@ -12,19 +12,23 @@
       2. Go to "Tools > Show REST Services".<br>
       3. A Tool Window named "REST Services" will show up on your right.<br>
       4. Navigate through the tree, click on any REST Service and you will go directly to that service code in your Editor.<br>
-      5. Right-click on any service and copy the full url or copy a cURL command.
+      5. Right-click on any service and copy the full url or copy a cURL command.<br>
+      6. Use the search box to filter the services. <br>
 
     ]]></description>
 
   <change-notes><![CDATA[
+      1.2 <br>
+      - Added search box<br>
+
       1.1 <br>
-      - Added number of services at the bottom
-      - Bug fixed for multiple IDE instances
-      - Added Copy REST Url option
-      - Added cURL option
+      - Added number of services at the bottom<br>
+      - Bug fixed for multiple IDE instances<br>
+      - Added Copy REST Url option<br>
+      - Added cURL option<br>
 
       1.0 <br>
-      - Reads all classes in your project looking for REST services.
+      - Reads all classes in your project looking for REST services.<br>
     ]]>
   </change-notes>
 

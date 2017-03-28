@@ -1,6 +1,8 @@
-package com.restdocs.action.common;
+package com.restdocs.toolwindow;
 
 import com.intellij.icons.AllIcons;
+import com.restdocs.action.common.HttpMethod;
+import com.restdocs.action.common.RestServiceNode;
 
 import javax.swing.*;
 import javax.swing.tree.DefaultMutableTreeNode;

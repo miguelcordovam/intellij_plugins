@@ -2,14 +2,12 @@ package com.restdocs.toolwindow;
 
 import com.intellij.openapi.ide.CopyPasteManager;
 import com.intellij.openapi.project.Project;
-import com.intellij.psi.PsiMethod;
 import com.intellij.ui.components.JBScrollPane;
 import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
-import com.restdocs.action.common.HttpMethod;
 import com.restdocs.action.common.RestServiceNode;
-import com.restdocs.action.common.RestTreeCellRenderer;
 import com.restdocs.action.util.CopyRestUrlUtil;
+import org.jdesktop.swingx.HorizontalLayout;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
@@ -21,16 +19,20 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
-public class ShowRestServicesForm {
+public class RestServicesUI {
 
     private JPanel contentPanel = new JPanel();
     private JTree servicesTree;
     private JScrollPane scrollPane;
     private JLabel status;
+    private JTextField query;
+    private JPanel searchPanel;
+    private JButton search;
+    private JButton clear;
 
     private CopyRestUrlUtil copyRestUrlUtil;
 
-    public ShowRestServicesForm(Project project) {
+    public RestServicesUI(Project project) {
         scrollPane = new JBScrollPane(servicesTree, JBScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JBScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
         status.setBackground(Color.gray);
 
@@ -40,16 +42,25 @@ public class ShowRestServicesForm {
         contentPanel.setBorder(BorderFactory.createEmptyBorder());
 
         scrollPane.setBackground(Color.white);
-        contentPanel.setLayout(new GridLayoutManager(2, 1));
-        contentPanel.add(scrollPane,
+        query.setColumns(15);
+
+        searchPanel.setLayout(new HorizontalLayout());
+
+        contentPanel.setLayout(new GridLayoutManager(3, 1));
+
+        contentPanel.add(searchPanel,
                 new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH,
+                        GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED,
+                        null, null, null));
+        contentPanel.add(scrollPane,
+                new GridConstraints(1, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH,
                         GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
                         GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
                         null, null, null));
-
-        contentPanel.add(status, new GridConstraints(1, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH,
-                GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED,
-                null, null, null));
+        contentPanel.add(status,
+                new GridConstraints(2, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH,
+                        GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED,
+                        null, null, null));
 
         contentPanel.setVisible(true);
         servicesTree.setModel(null);
@@ -135,5 +146,17 @@ public class ShowRestServicesForm {
 
     public void setStatusText(String status) {
         this.status.setText(status);
+    }
+
+    public JTextField getQuery() {
+        return query;
+    }
+
+    public JButton getClear() {
+        return clear;
+    }
+
+    public JButton getSearch() {
+        return search;
     }
 }

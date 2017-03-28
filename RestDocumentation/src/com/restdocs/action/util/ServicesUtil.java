@@ -12,6 +12,7 @@ import com.restdocs.action.common.HttpMethod;
 import com.restdocs.action.common.RestServiceNode;
 
 import java.util.*;
+import java.util.regex.Pattern;
 
 import static com.restdocs.action.common.SpringAnnotations.CONTROLLER;
 import static com.restdocs.action.common.SpringAnnotations.REQUEST_MAPPING_QUALIFIED_NAME;
@@ -46,7 +47,7 @@ public class ServicesUtil {
         return restUrls;
     }
 
-    public Map<String, List<RestServiceNode>> getAllServices(Project project) {
+    public Map<String, List<RestServiceNode>> getAllServicesByModule(Project project) {
         Module[] modules = ModuleManager.getInstance(project).getModules();
 
         Map<String, List<RestServiceNode>> result = new HashMap<>();
@@ -80,7 +81,6 @@ public class ServicesUtil {
                     }
                 }
             });
-
         }
 
         return result;
@@ -131,5 +131,13 @@ public class ServicesUtil {
         }
 
         return HttpMethod.valueOf(method);
+    }
+
+    public boolean matches (String serviceUrl, String serviceQuery) {
+        StringBuilder pattern = new StringBuilder("^.*");
+        pattern.append(serviceQuery.toLowerCase().trim().replace("/", ".*"));
+        pattern.append(".*$");
+
+        return Pattern.matches(pattern.toString(), serviceUrl.toLowerCase());
     }
 }
