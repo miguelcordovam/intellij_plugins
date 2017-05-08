@@ -6,25 +6,44 @@ import com.intellij.psi.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static com.copyresturl.common.SpringAnnotations.REQUEST_PARAM;
+import static com.copyresturl.util.SpringUtil.containsSpringAnnotation;
 import static java.util.stream.Collectors.joining;
 
 public class PsiElementUtil {
 
-    private String getAttributeValue(PsiNameValuePair[] attributes, String attributeName) {
+    private static List<String> getValues(PsiNameValuePair psiNameValuePair) {
+        List<String> values = new ArrayList<>();
+        PsiAnnotationMemberValue value = psiNameValuePair.getValue();
+
+        if (value instanceof PsiReferenceExpression) {
+            PsiReferenceExpression expression = (PsiReferenceExpression) value;
+            values.add(expression.getText());
+        } else if (value instanceof PsiLiteralExpression) {
+            values.add(psiNameValuePair.getLiteralValue());
+        } else if (value instanceof PsiArrayInitializerMemberValue) {
+            PsiArrayInitializerMemberValue arrayValue = (PsiArrayInitializerMemberValue) value;
+
+            for (PsiAnnotationMemberValue initializer : arrayValue.getInitializers()) {
+                values.add(initializer.getText().replaceAll("\\\"", ""));
+            }
+        }
+        return values;
+    }
+
+    private static List<String> getAttributeValue(PsiNameValuePair[] attributes, String attributeName) {
+        List<String> values = new ArrayList<>();
+        values.add("");
+
         if (attributes != null && attributes.length == 1) {
-            PsiNameValuePair attribute = attributes[0];
-            if (attribute.getName() != null && attribute.getName().equalsIgnoreCase(attributeName)) {
-                if (attributeName.equalsIgnoreCase("value")) {
-                    return attribute.getLiteralValue();
-                } else if (attributeName.equalsIgnoreCase("method")) {
-                    return attribute.getValue().getText();
-                }
-            } else if (attribute.getName() == null && attribute.getLiteralValue() != null && "value".equalsIgnoreCase(attributeName)) {
-                return attribute.getLiteralValue();
+            PsiNameValuePair psiNameValuePair = attributes[0];
+
+            if (psiNameValuePair.getName() != null && psiNameValuePair.getName().equalsIgnoreCase(attributeName) ||
+                    psiNameValuePair.getName() == null &&
+                            ("value".equalsIgnoreCase(attributeName) || "path".equalsIgnoreCase(attributeName))) {
+                return getValues(psiNameValuePair);
             }
         } else if (attributes != null && attributes.length > 1) {
             Optional<PsiNameValuePair> psiNameValuePair =
@@ -33,17 +52,14 @@ public class PsiElementUtil {
                             .findFirst();
 
             if (psiNameValuePair.isPresent()) {
-                if (psiNameValuePair.get().getLiteralValue() != null) {
-                    return psiNameValuePair.get().getLiteralValue();
-                } else {
-                    return psiNameValuePair.get().getValue().getText();
-                }
+                return getValues(psiNameValuePair.get());
             }
         }
-        return "";
+
+        return values;
     }
 
-    public String createQueryWithParameters(PsiParameterList parameterList) {
+    public static String createQueryWithParameters(PsiParameterList parameterList) {
         StringBuilder query = new StringBuilder();
         List<String> params = new ArrayList<>();
 
@@ -71,19 +87,9 @@ public class PsiElementUtil {
         return query.toString();
     }
 
-    public boolean containsSpringAnnotation(SpringAnnotations springAnnotation, PsiModifierList modifierList) {
-        if (modifierList != null) {
-            PsiAnnotation[] annotations = modifierList.getAnnotations();
-
-            return Stream.of(annotations)
-                    .map(a -> a.getQualifiedName())
-                    .anyMatch(name -> name.equalsIgnoreCase(springAnnotation.getQualifiedName()));
-        }
-
-        return false;
-    }
-
-    public String getAnnotationValue(PsiModifierList modifierList, String attributeName, SpringAnnotations springAnnotation) {
+    public static String getAnnotationValue(PsiModifierList modifierList, String attributeName, SpringAnnotations springAnnotation) {
+        List<String> values = new ArrayList<>();
+        values.add("");
 
         if (modifierList != null) {
             PsiAnnotation[] annotations = modifierList.getAnnotations();
@@ -95,10 +101,24 @@ public class PsiElementUtil {
                     PsiAnnotationParameterList parameterList = psiAnnotation.getParameterList();
                     PsiNameValuePair[] attributes = parameterList.getAttributes();
 
-                    return getAttributeValue(attributes, attributeName);
+                    return getAttributeValue(attributes, attributeName).get(0);
                 }
             }
         }
-        return "";
+        return values.get(0);
+    }
+
+    public static String getUrl(PsiModifierList modifierList, SpringAnnotations springAnnotation) {
+
+        String withPath = getAnnotationValue(modifierList, "path", springAnnotation);
+        String withValue = getAnnotationValue(modifierList, "value", springAnnotation);
+
+        if (withPath.isEmpty() && !withValue.isEmpty()) {
+            return withValue;
+        } else if (!withPath.isEmpty() && withValue.isEmpty()) {
+            return withPath;
+        }
+
+        return withValue;
     }
 }

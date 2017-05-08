@@ -4,7 +4,7 @@ import java.util.Properties;
 
 public class PropertiesUtil {
 
-    private Properties getPropertiesFromString(String file) {
+    private static Properties getPropertiesFromString(String file) {
         Properties properties = new Properties();
 
         String[] lines = file.split("\n");
@@ -24,15 +24,15 @@ public class PropertiesUtil {
         return properties;
     }
 
-    private boolean lineIsComment(String line) {
+    private static boolean lineIsComment(String line) {
         return line.startsWith("#");
     }
 
-    private boolean lineContainsProperty(String line) {
+    private static boolean lineContainsProperty(String line) {
         return line.contains("=");
     }
 
-    public String getPropertyValue(String file, String key) {
+    public static String getPropertyValue(String file, String key) {
         Properties properties = getPropertiesFromString(file);
         return (properties.getProperty(key) != null) ? properties.getProperty(key) : "";
     }
