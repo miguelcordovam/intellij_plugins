@@ -14,6 +14,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static com.restdocs.action.common.SpringAnnotations.REQUEST_PARAM;
+import static com.restdocs.action.util.PropertiesUtil.getPropertyValue;
+import static com.restdocs.action.util.PsiElementUtil.getAnnotationValue;
+import static com.restdocs.action.util.SpringUtil.containsSpringAnnotation;
 import static java.util.stream.Collectors.joining;
 
 public class CopyRestUrlUtil {
@@ -25,8 +28,6 @@ public class CopyRestUrlUtil {
     private static final String SERVER_CONTEXT_PATH = "server.contextPath";
 
     private Project project;
-    private PropertiesUtil propertiesUtil = new PropertiesUtil();
-    private PsiElementUtil psiElementUtil = new PsiElementUtil();
 
     public CopyRestUrlUtil(Project project) {
         this.project = project;
@@ -42,8 +43,8 @@ public class CopyRestUrlUtil {
         if (filesByName.length > 0) {
             PsiFile psiFile = filesByName[0];
 
-            port = propertiesUtil.getPropertyValue(psiFile.getText(), SERVER_PORT);
-            contextPath = propertiesUtil.getPropertyValue(psiFile.getText(), SERVER_CONTEXT_PATH);
+            port = getPropertyValue(psiFile.getText(), SERVER_PORT);
+            contextPath = getPropertyValue(psiFile.getText(), SERVER_CONTEXT_PATH);
         }
 
         String queryList = "";
@@ -71,8 +72,8 @@ public class CopyRestUrlUtil {
         for (PsiParameter parameter : parameters) {
             PsiModifierList modifierList = parameter.getModifierList();
 
-            if (psiElementUtil.containsSpringAnnotation(REQUEST_PARAM, modifierList)) {
-                List<String> paramValue = psiElementUtil.getAnnotationValue(modifierList, "value", REQUEST_PARAM);
+            if (containsSpringAnnotation(REQUEST_PARAM, modifierList)) {
+                List<String> paramValue = getAnnotationValue(modifierList, "value", REQUEST_PARAM);
 
                 if (paramValue.isEmpty()) {
                     params.add(parameter.getName());

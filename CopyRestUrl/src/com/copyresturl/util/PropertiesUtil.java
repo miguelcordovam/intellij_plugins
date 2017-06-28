@@ -4,6 +4,8 @@ import java.util.Properties;
 
 public class PropertiesUtil {
 
+    public static final String EQUALS = "=";
+
     private static Properties getPropertiesFromString(String file) {
         Properties properties = new Properties();
 
@@ -11,7 +13,7 @@ public class PropertiesUtil {
 
         for (String line : lines) {
             if (!lineIsComment(line) && lineContainsProperty(line)) {
-                String[] prop = line.split("=");
+                String[] prop = line.split(EQUALS);
                 if (prop.length > 1) {
                     String key = prop[0].trim();
                     String value = prop[1].trim();
@@ -29,7 +31,7 @@ public class PropertiesUtil {
     }
 
     private static boolean lineContainsProperty(String line) {
-        return line.contains("=");
+        return line.contains(EQUALS);
     }
 
     public static String getPropertyValue(String file, String key) {

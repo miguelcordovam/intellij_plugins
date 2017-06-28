@@ -3,6 +3,7 @@ package com.copyresturl.common;
 public enum SpringAnnotations {
 
     CONTROLLER("org.springframework.stereotype.Controller"),
+    REST_CONTROLLER("org.springframework.web.bind.annotation.RestController"),
     REQUEST_PARAM("org.springframework.web.bind.annotation.RequestParam"),
     REQUEST_MAPPING_QUALIFIED_NAME("org.springframework.web.bind.annotation.RequestMapping"),
     GET_MAPPING_QUALIFIED_NAME("org.springframework.web.bind.annotation.GetMapping"),

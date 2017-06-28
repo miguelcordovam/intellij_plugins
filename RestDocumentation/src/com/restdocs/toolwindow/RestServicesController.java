@@ -19,6 +19,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import static com.restdocs.action.util.ServicesUtil.getAllServicesByModule;
+import static com.restdocs.action.util.ServicesUtil.matches;
 import static java.util.stream.Collectors.groupingBy;
 import static javax.swing.tree.TreeSelectionModel.SINGLE_TREE_SELECTION;
 
@@ -26,7 +28,6 @@ public class RestServicesController {
 
     private RestServicesUI ui;
     private Map<String, List<RestServiceNode>> allServices;
-    private ServicesUtil servicesUtil = new ServicesUtil();
 
     public void init(Project project) {
         ui = new RestServicesUI(project);
@@ -36,7 +37,7 @@ public class RestServicesController {
     }
 
     private Map<String, List<RestServiceNode>> loadServices(Project project) {
-        return servicesUtil.getAllServicesByModule(project);
+        return getAllServicesByModule(project);
     }
 
     private void showServicesInTree(Map<String, List<RestServiceNode>> services) {
@@ -84,7 +85,7 @@ public class RestServicesController {
                 for (String moduleName : allServices.keySet()) {
                     List<RestServiceNode> services = allServices.get(moduleName)
                             .stream()
-                            .filter(r -> servicesUtil.matches(r.getUrl(), queryText))
+                            .filter(r -> matches(r.getUrl(), queryText))
                             .collect(Collectors.toList());
 
                     if (services.size() > 0) {

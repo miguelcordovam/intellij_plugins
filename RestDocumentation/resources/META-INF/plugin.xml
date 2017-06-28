@@ -1,7 +1,7 @@
 <idea-plugin version="2">
   <id>Show REST Services</id>
   <name>Show REST Services</name>
-  <version>1.2</version>
+  <version>1.3</version>
   <vendor email="miguelcordovadev@gmail.com" url="https://github.com/miguelcordovam/intellij_plugins/tree/master/RestDocumentation"></vendor>
 
   <description><![CDATA[
@@ -18,6 +18,11 @@
     ]]></description>
 
   <change-notes><![CDATA[
+      1.3 <br>
+      - Added support for @RestController annotation
+      - Support for Spring Framework 4.3 annotations: @GetMapping, @PostMapping, @PutMapping, @DeleteMapping, @PatchMapping<br>
+      - Support for path and value. <br>
+
       1.2 <br>
       - Added search box<br>
 

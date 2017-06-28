@@ -6,6 +6,7 @@ import com.intellij.openapi.module.ModuleManager;
 import com.intellij.openapi.project.Project;
 import com.intellij.psi.PsiClass;
 import com.intellij.psi.PsiMethod;
+import com.intellij.psi.PsiModifierList;
 import com.intellij.psi.search.GlobalSearchScope;
 import com.intellij.psi.search.searches.AllClassesSearch;
 import com.restdocs.action.common.HttpMethod;
@@ -14,29 +15,49 @@ import com.restdocs.action.common.RestServiceNode;
 import java.util.*;
 import java.util.regex.Pattern;
 
-import static com.restdocs.action.common.SpringAnnotations.CONTROLLER;
-import static com.restdocs.action.common.SpringAnnotations.REQUEST_MAPPING_QUALIFIED_NAME;
+import static com.restdocs.action.common.HttpMethod.*;
+import static com.restdocs.action.common.SpringAnnotations.*;
+import static com.restdocs.action.util.PsiElementUtil.getAnnotationValue;
+import static com.restdocs.action.util.PsiElementUtil.getUrls;
+import static com.restdocs.action.util.SpringUtil.containsSpringAnnotation;
+import static com.restdocs.action.util.SpringUtil.isRestMethod;
 
 public class ServicesUtil {
 
     public static final String VALUE = "value";
     public static final String METHOD = "method";
-    private PsiElementUtil psiElementUtil = new PsiElementUtil();
 
-    private boolean isClassControllerAnnotated(PsiClass psiClass) {
-        return psiElementUtil.containsSpringAnnotation(CONTROLLER, psiClass.getModifierList());
+    private static boolean isClassControllerAnnotated(PsiClass psiClass) {
+        return containsSpringAnnotation(CONTROLLER, psiClass.getModifierList()) ||
+                containsSpringAnnotation(REST_CONTROLLER, psiClass.getModifierList());
     }
 
-    private boolean isMethodRequestMappingAnnotated(PsiMethod method) {
-        return psiElementUtil.containsSpringAnnotation(REQUEST_MAPPING_QUALIFIED_NAME, method.getModifierList());
+    private static boolean isMethodRestAnnotated(PsiMethod method) {
+        return isRestMethod(method.getModifierList());
     }
 
-    private List<String> getRESTUrls(PsiMethod psiMethod) {
+    private static List<String> getRESTUrls(PsiMethod psiMethod) {
 
         List<String> restUrls = new ArrayList<>();
 
-        List<String> classUrls = psiElementUtil.getAnnotationValue(psiMethod.getContainingClass().getModifierList(), VALUE, REQUEST_MAPPING_QUALIFIED_NAME);
-        List<String> methodUrls = psiElementUtil.getAnnotationValue(psiMethod.getModifierList(), VALUE, REQUEST_MAPPING_QUALIFIED_NAME);
+        List<String> classUrls = getAnnotationValue(psiMethod.getContainingClass().getModifierList(), VALUE, REQUEST_MAPPING_QUALIFIED_NAME);
+        PsiModifierList methodModifierList = psiMethod.getModifierList();
+
+        List<String> methodUrls = new ArrayList<>();
+
+        if (containsSpringAnnotation(REQUEST_MAPPING_QUALIFIED_NAME, methodModifierList)) {
+            methodUrls = getUrls(methodModifierList, REQUEST_MAPPING_QUALIFIED_NAME);
+        } else if (containsSpringAnnotation(GET_MAPPING_QUALIFIED_NAME, methodModifierList)) {
+            methodUrls = getUrls(methodModifierList, GET_MAPPING_QUALIFIED_NAME);
+        } else if (containsSpringAnnotation(POST_MAPPING_QUALIFIED_NAME, methodModifierList)) {
+            methodUrls = getUrls(methodModifierList, POST_MAPPING_QUALIFIED_NAME);
+        } else if (containsSpringAnnotation(PATCH_MAPPING_QUALIFIED_NAME, methodModifierList)) {
+            methodUrls = getUrls(methodModifierList, PATCH_MAPPING_QUALIFIED_NAME);
+        } else if (containsSpringAnnotation(DELETE_MAPPING_QUALIFIED_NAME, methodModifierList)) {
+            methodUrls = getUrls(methodModifierList, DELETE_MAPPING_QUALIFIED_NAME);
+        } else if (containsSpringAnnotation(PUT_MAPPING_QUALIFIED_NAME, methodModifierList)) {
+            methodUrls = getUrls(methodModifierList, PUT_MAPPING_QUALIFIED_NAME);
+        }
 
         for (String classUrl : classUrls) {
             for (String methodUrl : methodUrls) {
@@ -47,7 +68,7 @@ public class ServicesUtil {
         return restUrls;
     }
 
-    public Map<String, List<RestServiceNode>> getAllServicesByModule(Project project) {
+    public static Map<String, List<RestServiceNode>> getAllServicesByModule(Project project) {
         Module[] modules = ModuleManager.getInstance(project).getModules();
 
         Map<String, List<RestServiceNode>> result = new HashMap<>();
@@ -67,7 +88,7 @@ public class ServicesUtil {
                             PsiMethod[] methods = psiClass.getMethods();
 
                             for (PsiMethod method : methods) {
-                                if (isMethodRequestMappingAnnotated(method)) {
+                                if (isMethodRestAnnotated(method)) {
                                     services.add(method);
                                 }
                             }
@@ -86,25 +107,40 @@ public class ServicesUtil {
         return result;
     }
 
-    private List<RestServiceNode> createRestServices(List<PsiMethod> services) {
+    private static List<RestServiceNode> createRestServices(List<PsiMethod> services) {
         List<RestServiceNode> restServices = new ArrayList<>();
 
         for (PsiMethod method : services) {
 
             List<String> restUrls = getRESTUrls(method);
-            List<String> methods = psiElementUtil.getAnnotationValue(method.getModifierList(), METHOD, REQUEST_MAPPING_QUALIFIED_NAME);
+            List<String> httpMethods = new ArrayList<>();
+            PsiModifierList methodModifierList = method.getModifierList();
 
-            if (methods.size() == 1 && methods.get(0).isEmpty()) {
-                List<String> classMethods = psiElementUtil.getAnnotationValue(method.getContainingClass().getModifierList(), METHOD, REQUEST_MAPPING_QUALIFIED_NAME);
+            if (containsSpringAnnotation(REQUEST_MAPPING_QUALIFIED_NAME, methodModifierList)) {
+                httpMethods.addAll(getAnnotationValue(methodModifierList, METHOD, REQUEST_MAPPING_QUALIFIED_NAME));
+            } else if (containsSpringAnnotation(GET_MAPPING_QUALIFIED_NAME, methodModifierList)) {
+                httpMethods.add(GET.toString());
+            } else if (containsSpringAnnotation(POST_MAPPING_QUALIFIED_NAME, methodModifierList)) {
+                httpMethods.add(POST.toString());
+            } else if (containsSpringAnnotation(PATCH_MAPPING_QUALIFIED_NAME, methodModifierList)) {
+                httpMethods.add(PATCH.toString());
+            } else if (containsSpringAnnotation(DELETE_MAPPING_QUALIFIED_NAME, methodModifierList)) {
+                httpMethods.add(DELETE.toString());
+            } else if (containsSpringAnnotation(PUT_MAPPING_QUALIFIED_NAME, methodModifierList)) {
+                httpMethods.add(PUT.toString());
+            }
+
+            if (httpMethods.size() == 1 && httpMethods.get(0).isEmpty()) {
+                List<String> classMethods = getAnnotationValue(method.getContainingClass().getModifierList(), METHOD, REQUEST_MAPPING_QUALIFIED_NAME);
 
                 if (classMethods.size() >= 1 && !classMethods.get(0).isEmpty()) {
-                    methods.clear();
-                    methods.addAll(classMethods);
+                    httpMethods.clear();
+                    httpMethods.addAll(classMethods);
                 }
             }
 
             for (String url : restUrls) {
-                for (String met : methods) {
+                for (String met : httpMethods) {
                     RestServiceNode restServiceNode = new RestServiceNode();
                     restServiceNode.setUrl(url);
                     restServiceNode.setMethod(getHttpMethod(met));
@@ -119,9 +155,9 @@ public class ServicesUtil {
         return restServices;
     }
 
-    private HttpMethod getHttpMethod(String method) {
+    private static HttpMethod getHttpMethod(String method) {
         if (method.isEmpty()) {
-            return HttpMethod.GET;
+            return GET;
         }
 
         String[] split = method.split("\\.");
@@ -133,7 +169,7 @@ public class ServicesUtil {
         return HttpMethod.valueOf(method);
     }
 
-    public boolean matches (String serviceUrl, String serviceQuery) {
+    public static boolean matches(String serviceUrl, String serviceQuery) {
         StringBuilder pattern = new StringBuilder("^.*");
         pattern.append(serviceQuery.toLowerCase().trim().replace("/", ".*"));
         pattern.append(".*$");

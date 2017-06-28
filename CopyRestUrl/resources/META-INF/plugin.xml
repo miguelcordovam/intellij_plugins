@@ -1,12 +1,12 @@
 <idea-plugin version="2">
   <id>CopyRestUrl</id>
   <name>Copy REST Url</name>
-  <version>1.4</version>
+  <version>1.5</version>
   <vendor email="miguelcordovadev@gmail.com" url="https://github.com/miguelcordovam/intellij_plugins/tree/master/CopyRestUrl"></vendor>
   <description>
 
 <![CDATA[
-      Copy REST Url will copy REST url from a Spring @Controller method. <br>
+      Copy REST Url will copy REST url from a Spring @Controller or @RestController method. <br>
       Just right-click on the method, and select "Copy REST Url" and it will copy the url to the clipboard.<br>
       You can also use ctrl + alt + R shortcut over the method name. Then you can paste it on the browser or anywhere you want. <br><br>
       Features:<br>
@@ -21,6 +21,9 @@
   <change-notes>
 
     <![CDATA[
+        1.5 <br>
+        - Support for Spring Framework annotation: @RestController<br>
+
         1.4 <br>
         - Support for Spring Framework 4.3 annotations: @GetMapping, @PostMapping, @PutMapping, @DeleteMapping, @PatchMapping<br>
         - Support for path and value. <br>

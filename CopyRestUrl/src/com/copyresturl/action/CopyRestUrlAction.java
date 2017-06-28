@@ -28,6 +28,8 @@ public class CopyRestUrlAction extends AnAction {
     private static final String APPLICATION_PROPERTIES = "application.properties";
     private static final String SERVER_PORT = "server.port";
     private static final String SERVER_CONTEXT_PATH = "server.contextPath";
+    public static final String GET = "GET";
+    public static final String METHOD = "method";
 
     @Override
     public void actionPerformed(AnActionEvent e) {
@@ -49,9 +51,9 @@ public class CopyRestUrlAction extends AnAction {
             if (containsSpringAnnotation(REQUEST_MAPPING_QUALIFIED_NAME, methodModifierList)) {
                 methodUrl = getUrl(methodModifierList, REQUEST_MAPPING_QUALIFIED_NAME);
 
-                String httpMethod = getAnnotationValue(methodModifierList, "method", REQUEST_MAPPING_QUALIFIED_NAME);
+                String httpMethod = getAnnotationValue(methodModifierList, METHOD, REQUEST_MAPPING_QUALIFIED_NAME);
 
-                if (httpMethod.equalsIgnoreCase("GET") || httpMethod.equalsIgnoreCase(REQUEST_METHOD_GET) || httpMethod.isEmpty()) {
+                if (httpMethod.equalsIgnoreCase(GET) || httpMethod.equalsIgnoreCase(REQUEST_METHOD_GET) || httpMethod.isEmpty()) {
                     queryList = createQueryWithParameters(psiMethod.getParameterList());
                 }
 
@@ -88,7 +90,7 @@ public class CopyRestUrlAction extends AnAction {
             PsiFile psiFile = filesByName[0];
             String port = getPropertyValue(psiFile.getText(), SERVER_PORT);
 
-            url.append(port.isEmpty() ? DEFAULT_PORT : port );
+            url.append(port.isEmpty() ? DEFAULT_PORT : port);
             url.append(getPropertyValue(psiFile.getText(), SERVER_CONTEXT_PATH));
         }
         return url.toString();
@@ -108,7 +110,8 @@ public class CopyRestUrlAction extends AnAction {
             PsiClass psiClass = psiMethod.getContainingClass();
 
             available = (isRestMethod(psiMethod.getModifierList())
-                    && containsSpringAnnotation(CONTROLLER, psiClass.getModifierList()));
+                    && (containsSpringAnnotation(CONTROLLER, psiClass.getModifierList()) ||
+                    containsSpringAnnotation(REST_CONTROLLER, psiClass.getModifierList())));
         }
 
         e.getPresentation().setVisible(project != null && editor != null && available);
