@@ -2,7 +2,7 @@ Show Rest Services Plugin
 --------------------------
 
 This plugin will create a tool window with all the REST services found in your project. 
-It will search in all classes that are @Controller annotated. 
+It will search in all classes that are @Controller and @RestController annotated.
 Just click on Tools > Show Rest Services and you will get the results. 
 Then you can just click on the services and it will take you to the method in the Editor.
 
