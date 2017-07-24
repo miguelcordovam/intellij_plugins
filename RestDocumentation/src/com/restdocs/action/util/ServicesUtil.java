@@ -59,9 +59,15 @@ public class ServicesUtil {
             methodUrls = getUrls(methodModifierList, PUT_MAPPING_QUALIFIED_NAME);
         }
 
-        for (String classUrl : classUrls) {
+        if (classUrls != null && classUrls.size() > 0) {
+            for (String classUrl : classUrls) {
+                for (String methodUrl : methodUrls) {
+                    restUrls.add(classUrl + methodUrl);
+                }
+            }
+        } else {
             for (String methodUrl : methodUrls) {
-                restUrls.add(classUrl + methodUrl);
+                restUrls.add(methodUrl);
             }
         }
 
@@ -117,7 +123,10 @@ public class ServicesUtil {
             PsiModifierList methodModifierList = method.getModifierList();
 
             if (containsSpringAnnotation(REQUEST_MAPPING_QUALIFIED_NAME, methodModifierList)) {
-                httpMethods.addAll(getAnnotationValue(methodModifierList, METHOD, REQUEST_MAPPING_QUALIFIED_NAME));
+                List<String> methodValue = getAnnotationValue(methodModifierList, METHOD, REQUEST_MAPPING_QUALIFIED_NAME);
+                if (!methodValue.isEmpty()) {
+                    httpMethods.addAll(methodValue);
+                }
             } else if (containsSpringAnnotation(GET_MAPPING_QUALIFIED_NAME, methodModifierList)) {
                 httpMethods.add(GET.toString());
             } else if (containsSpringAnnotation(POST_MAPPING_QUALIFIED_NAME, methodModifierList)) {
@@ -130,12 +139,14 @@ public class ServicesUtil {
                 httpMethods.add(PUT.toString());
             }
 
-            if (httpMethods.size() == 1 && httpMethods.get(0).isEmpty()) {
+            if (httpMethods.isEmpty()) {
                 List<String> classMethods = getAnnotationValue(method.getContainingClass().getModifierList(), METHOD, REQUEST_MAPPING_QUALIFIED_NAME);
 
                 if (classMethods.size() >= 1 && !classMethods.get(0).isEmpty()) {
                     httpMethods.clear();
                     httpMethods.addAll(classMethods);
+                } else {
+                    httpMethods.add(GET.toString());
                 }
             }
 
