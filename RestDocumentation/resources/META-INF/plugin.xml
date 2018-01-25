@@ -1,10 +1,12 @@
 <idea-plugin version="2">
   <id>Show REST Services</id>
   <name>Show REST Services</name>
-  <version>1.3</version>
+  <version>1.4</version>
   <vendor email="miguelcordovadev@gmail.com" url="https://github.com/miguelcordovam/intellij_plugins/tree/master/RestDocumentation"></vendor>
 
   <description><![CDATA[
+      <a href="https://www.paypal.me/mcordovam">Donate with PayPal</a><br><br>
+
       Show REST Services will create a Tool Window containing all the REST services in your project grouped by module and HTTP method.
       <br>
       <br>How does it work?<br>
@@ -13,24 +15,32 @@
       3. A Tool Window named "REST Services" will show up on your right.<br>
       4. Navigate through the tree, click on any REST Service and you will go directly to that service code in your Editor.<br>
       5. Right-click on any service and copy the full url or copy a cURL command.<br>
-      6. Use the search box to filter the services. <br>
+      6. Use the search box to filter the services. <br><br>
+
+      If you find the plugin useful, please consider any of these: <br>
+      - <a href="https://www.paypal.me/mcordovam">Donate with PayPal </a> to support the project<br>
+      - Send me an email or leave a comment saying thanks.<br><br>
 
     ]]></description>
 
   <change-notes><![CDATA[
+      1.4 <br>
+      - Adding support for constants inside method annotations <br>
+      - Bug fixing <br><br>
+
       1.3 <br>
-      - Added support for @RestController annotation
+      - Added support for @RestController annotation<br>
       - Support for Spring Framework 4.3 annotations: @GetMapping, @PostMapping, @PutMapping, @DeleteMapping, @PatchMapping<br>
-      - Support for path and value. <br>
+      - Support for path and value. <br><br>
 
       1.2 <br>
-      - Added search box<br>
+      - Added search box<br><br>
 
       1.1 <br>
       - Added number of services at the bottom<br>
       - Bug fixed for multiple IDE instances<br>
       - Added Copy REST Url option<br>
-      - Added cURL option<br>
+      - Added cURL option<br><br>
 
       1.0 <br>
       - Reads all classes in your project looking for REST services.<br>
